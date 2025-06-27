@@ -1,0 +1,20 @@
+{
+  "name": "Google Drive Image Scraper",
+  "id": "1520345552487949577",
+  "api": "1.0.0",
+  "main": "code.js",
+  "capabilities": [],
+  "enableProposedApi": true,
+  "documentAccess": "dynamic-page",
+  "editorType": ["figma", "figjam", "slides"],
+  "ui": "ui.html",
+  "networkAccess": {
+    "allowedDomains": [
+      "https://cdn.tailwindcss.com",
+      "https://drive.google.com",
+      "https://docs.google.com",
+      "https://googleapis.com",
+      "https://googleusercontent.com"
+    ]
+  }
+}
