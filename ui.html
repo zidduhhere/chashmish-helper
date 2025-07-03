@@ -306,19 +306,41 @@
 
           const error = document.createElement("div");
           error.className = "error-message";
+          error.style.cssText = `
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            border: 1px solid #f5c6cb;
+          `;
           error.textContent = message;
           document
             .querySelector(".container")
             .insertBefore(error, document.querySelector(".form-group"));
+
+          setTimeout(() => {
+            if (error.parentNode) error.parentNode.removeChild(error);
+          }, 8000);
         }
 
         // Listen for messages from plugin
         window.onmessage = (event) => {
           const message = event.data.pluginMessage;
+          console.log("Received message:", message);
+
           if (message.type === "scan-progress") {
             updateProgress(message.progress, message.status);
           } else if (message.type === "scan-complete") {
             showResults(message.images);
+          } else if (message.type === "error") {
+            showError(message.message);
+            resetUI();
+          } else if (message.type === "import-progress") {
+            updateProgress(message.progress, message.status);
+          } else if (message.type === "import-complete") {
+            showSuccess(`Successfully imported ${message.count} images!`);
+            resetUI();
           }
         };
 
@@ -327,11 +349,120 @@
           progressText.textContent = status;
         }
 
-        function showResults(images) {
+        function resetUI() {
           progressContainer.classList.add("hidden");
           scanButton.disabled = false;
+        }
+
+        function showSuccess(message) {
+          const existing = document.querySelector(".success-message");
+          if (existing) existing.remove();
+
+          const success = document.createElement("div");
+          success.className = "success-message";
+          success.style.cssText = `
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            border: 1px solid #c3e6cb;
+          `;
+          success.textContent = message;
+          document
+            .querySelector(".container")
+            .insertBefore(success, document.querySelector(".form-group"));
+
+          setTimeout(() => {
+            if (success.parentNode) success.parentNode.removeChild(success);
+          }, 5000);
+        }
+
+        function showResults(images) {
+          resetUI();
+
+          if (!images || images.length === 0) {
+            showError(
+              "No images found in the folder. Make sure the folder is public and contains image files."
+            );
+            return;
+          }
+
           document.getElementById("imageResults").classList.remove("hidden");
-          // Render image grid...
+          const imageGrid = document.getElementById("imageGrid");
+          imageGrid.innerHTML = "";
+
+          images.forEach((image, index) => {
+            const imageItem = document.createElement("div");
+            imageItem.className = "image-item";
+            imageItem.style.cssText = `
+              display: flex;
+              align-items: center;
+              padding: 8px;
+              border: 1px solid #e1e5e9;
+              border-radius: 4px;
+              margin-bottom: 8px;
+              background: white;
+            `;
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.checked = true;
+            checkbox.id = `image-${index}`;
+            checkbox.style.marginRight = "8px";
+
+            const thumbnail = document.createElement("img");
+            if (image.thumbnailUrl) {
+              thumbnail.src = image.thumbnailUrl;
+              thumbnail.style.cssText =
+                "width: 40px; height: 40px; object-fit: cover; margin-right: 8px; border-radius: 2px;";
+            } else {
+              thumbnail.style.cssText =
+                "width: 40px; height: 40px; background: #f0f0f0; margin-right: 8px; border-radius: 2px; display: flex; align-items: center; justify-content: center;";
+              thumbnail.textContent = "📷";
+            }
+
+            const label = document.createElement("label");
+            label.htmlFor = `image-${index}`;
+            label.textContent = image.name;
+            label.style.cssText = "flex: 1; cursor: pointer; font-size: 12px;";
+
+            imageItem.appendChild(checkbox);
+            imageItem.appendChild(thumbnail);
+            imageItem.appendChild(label);
+            imageGrid.appendChild(imageItem);
+          });
+
+          // Update import button click handler
+          const importButton = document.getElementById("importSelected");
+          importButton.onclick = () => {
+            const selectedImages = images.filter((_, index) => {
+              const checkbox = document.getElementById(`image-${index}`);
+              return checkbox && checkbox.checked;
+            });
+
+            if (selectedImages.length === 0) {
+              showError("Please select at least one image to import.");
+              return;
+            }
+
+            progressContainer.classList.remove("hidden");
+            importButton.disabled = true;
+
+            parent.postMessage(
+              {
+                pluginMessage: {
+                  type: "import-images",
+                  data: {
+                    images: selectedImages,
+                    createComponents:
+                      document.getElementById("createComponents").checked,
+                  },
+                },
+              },
+              "*"
+            );
+          };
         }
       });
     </script>

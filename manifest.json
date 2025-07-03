@@ -1,5 +1,5 @@
 {
-  "name": "Google Drive Image Scraper",
+  "name": "Chasmish Scrapper",
   "id": "1520345552487949577",
   "api": "1.0.0",
   "main": "code.js",
@@ -13,7 +13,15 @@
       "https://cdn.tailwindcss.com",
       "https://drive.google.com",
       "https://docs.google.com",
-      "https://googleapis.com",
+      "https://www.googleapis.com",
+      "https://www.googleapis.com/auth/drive",
+      "https://www.googleapis.com/auth/drive.photos.readonly",
+      "https://www.googleapis.com/auth/drive.file",
+      "https://www.googleapis.com/auth/drive.metadata.readonly",
+      "https://www.googleapis.com/auth/drive.readonly",
+      "https://www.googleapis.com/auth/drive.appdata",
+      "https://www.googleapis.com/auth/drive.photos",
+      "https://www.googleapis.com/auth/drive.file.readonly",
       "https://googleusercontent.com"
     ]
   }
